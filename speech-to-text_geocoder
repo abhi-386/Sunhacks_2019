@@ -1,0 +1,63 @@
+import speech_recognition as sr
+import reverse_geocoder as rg 
+import sys, webbrowser
+import geocoder
+
+def speech_to_text():
+    r = sr.Recognizer()
+    mic = sr.Microphone(device_index = 0,sample_rate = 44100, chunk_size = 512)
+    with mic as source:
+        r.adjust_for_ambient_noise(source)
+        audio = r.listen(source)
+    x = r.recognize_google(audio)
+    print(x)
+    return(x)
+
+def write_file( x ):
+    file1 = open("Location.txt","w")
+    file1.write(x)
+    file1.close()
+    
+if __name__ == "__main__":
+    x = speech_to_text()
+    write_file(x)
+        
+def read_file():
+    file1 = open("Location.txt")
+    for line in file1:
+        line = line.strip().split()
+    print( line)
+    file1.close()
+    return line
+
+def reverseGeocode(coordinates): 
+    # This will return the list of details of our cordinates
+    result = rg.search(coordinates) 
+    return ( result)
+      
+    # result is a list containing ordered dictionary. 
+    # pprint.pprint(result)  
+
+def get_current_cord():
+    # This will get our Cuurent location
+    g = geocoder.ip('me')
+    return (g.latlng)
+# Driver function  webbrowser.open("https://www.google.com/maps/dir/" + location)
+
+def open_browser( result , destination):
+    location = result[0]['name']
+    webbrowser.open("https://www.google.com/maps/dir/" +  "Sun Devil Fitness Complex, 400 E Apache Blvd, Tempe, AZ 85287"+ "/"+ destination )
+
+def find_destination( line):
+    for i in range (len(line)):
+        if (line[i] == 'location'):
+            return (" ".join(line[i+1:]))
+    return (" ".join(line))
+if __name__=="__main__":
+    line = read_file()
+    destination = find_destination( line)
+    lst_location = get_current_cord()
+    # Coorinates tuple.Can contain more than one pair. 
+    coordinates =(lst_location[0], lst_location[1])
+    result = (reverseGeocode(coordinates))
+    open_browser( result , destination)
